@@ -1,0 +1,7 @@
+# CodeLens AI - Dependencies
+# The core application runs 100% OUT-OF-THE-BOX on Python 3.10+ standard library with ZERO external packages required!
+
+# Optional dependencies for extended cloud integrations or FastAPI deployment:
+# google-genai>=0.1.0
+# fastapi>=0.110.0
+# uvicorn>=0.29.0

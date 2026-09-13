@@ -1,0 +1,124 @@
+/* Diff Viewer Styles */
+
+.diff-header-bar {
+  padding: 10px 16px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.diff-stats-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.diff-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.diff-add { color: #34d399; }
+.diff-del { color: #f87171; }
+
+.diff-table-container {
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.diff-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.diff-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.diff-gutter {
+  width: 45px;
+  min-width: 45px;
+  padding: 2px 8px;
+  text-align: right;
+  color: var(--text-muted);
+  user-select: none;
+  border-right: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.diff-content {
+  padding: 2px 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Row types */
+.diff-row.equal {
+  color: var(--text-secondary);
+}
+
+.diff-row.insert {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+}
+.diff-row.insert .diff-gutter {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.diff-row.delete {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+.diff-row.delete .diff-gutter {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.diff-row.modified {
+  background: rgba(234, 179, 8, 0.12);
+  color: #fde047;
+}
+.diff-row.modified .diff-gutter {
+  background: rgba(234, 179, 8, 0.2);
+  color: #facc15;
+}
+
+/* Split (Side-by-Side) Diff */
+.split-diff-wrapper {
+  display: flex;
+  width: 100%;
+}
+
+.split-diff-pane {
+  flex: 1;
+  width: 50%;
+  overflow-x: auto;
+}
+
+.split-diff-pane:first-child {
+  border-right: 1px solid var(--border-subtle);
+}
+
+.split-pane-header {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+}

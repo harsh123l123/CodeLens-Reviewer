@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeLens Reviewer - Automated Code Review</title>
+  <meta name="description" content="Automated Code Review Platform. Instant security auditing, bug detection, performance optimization, diff comparison, and test generation.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="css/diff.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <!-- Hidden File & Folder Inputs -->
+  <input type="file" id="file-input" style="display: none;" accept=".py,.js,.ts,.jsx,.tsx,.php,.go,.java,.cpp,.c,.cs,.rs,.sql,.html,.css,.json,.md,.txt">
+  <input type="file" id="folder-input" webkitdirectory directory multiple style="display: none;">
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="logo-badge" aria-label="CodeLens Logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+      </div>
+      <div class="brand-name">
+        CodeLens <span style="color: var(--accent-cyan);">Reviewer</span>
+      </div>
+
+      <!-- Quick File & Folder Actions in Header -->
+      <div style="display: flex; gap: 8px; margin-left: 14px;">
+        <button id="btn-open-folder" class="btn btn-secondary btn-sm" title="Open a project folder from your system">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Open Folder
+        </button>
+
+        <button id="btn-upload-file" class="btn btn-secondary btn-sm" title="Upload a single code file">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Upload File
+        </button>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Primary Review Action Button -->
+      <button id="btn-run-review" class="btn btn-primary" style="font-size: 14px; padding: 9px 22px; font-weight: 700; letter-spacing: 0.3px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        Review Code
+      </button>
+
+
+      <!-- Export Report -->
+      <button id="btn-export" class="btn btn-secondary btn-sm" title="Export Review Report">
+        Export
+      </button>
+
+      <!-- Settings -->
+      <button id="btn-settings" class="btn btn-secondary btn-sm" title="AI Model & API Key Settings">
+        Settings
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Split-Pane Workspace -->
+  <main id="workspace-container" class="workspace-container">
+    
+    <!-- Left Sidebar: Project File Explorer -->
+    <aside id="sidebar-pane" class="sidebar-pane" aria-label="Project Explorer">
+      <div class="sidebar-header">
+        <span>Project Files</span>
+        <button id="btn-toggle-sidebar" class="btn btn-secondary btn-icon btn-sm" title="Collapse Explorer" style="width: 24px; height: 24px; font-size: 11px;">
+          &laquo;
+        </button>
+      </div>
+
+      <div id="file-tree-container" class="file-tree-container">
+        <!-- Initial empty state prompt -->
+        <div id="empty-tree-prompt" style="padding: 24px 12px; text-align: center; color: var(--text-muted);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px; opacity: 0.6;">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <p style="font-size: 12px; font-weight: 500; margin-bottom: 12px;">No folder opened</p>
+          <button id="btn-open-folder-cta" class="btn btn-secondary btn-sm" style="width: 100%;">
+            Select Folder
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Pane: Code Editor & Diff Comparison -->
+    <section id="editor-pane" class="editor-pane" aria-label="Code Editor Pane">
+      
+      <!-- Editor Toolbar -->
+      <div class="editor-toolbar">
+        <div class="toolbar-left">
+          <!-- Sidebar Expand Toggle (visible when collapsed) -->
+          <button id="btn-expand-sidebar" class="btn btn-secondary btn-sm" title="Show Project Files" style="display: none; padding: 4px 8px;">
+            Files &raquo;
+          </button>
+
+          <!-- Current Active File Indicator -->
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-primary);">
+            <span id="active-filename">Untitled</span>
+          </div>
+
+          <!-- View Mode Toggle -->
+          <div class="segmented-control" role="group" aria-label="Editor View Modes" style="margin-left: 10px;">
+            <button class="segmented-btn active" data-mode="editor">
+              Code Editor
+            </button>
+            <button class="segmented-btn" data-mode="diff">
+              Diff Comparison
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <!-- Language Selector -->
+          <div class="lang-select-wrapper">
+            <select id="select-language" class="custom-select" aria-label="Select Programming Language">
+              <option value="python">Python</option>
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+              <option value="php">PHP</option>
+              <option value="go">Go</option>
+              <option value="java">Java</option>
+              <option value="cpp">C++</option>
+              <option value="c">C</option>
+              <option value="csharp">C#</option>
+              <option value="rust">Rust</option>
+              <option value="sql">SQL</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+            </select>
+          </div>
+
+          <button id="btn-clear-code" class="btn btn-secondary btn-sm" title="Clear code editor">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Editor Canvas Container -->
+      <div id="editor-body-container" class="editor-body-container">
+        <!-- Monaco Editor Element -->
+        <div id="monaco-editor-wrapper"></div>
+
+        <!-- Split Diff Viewer Element -->
+        <div id="diff-view-wrapper"></div>
+
+        <!-- Drag & Drop Upload Overlay -->
+        <div id="drop-overlay" class="drop-overlay">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <h3>Drop code file or folder here</h3>
+          <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Supports Python, JavaScript, TypeScript, Go, Java, PHP, C++, SQL, Rust, and more</p>
+        </div>
+      </div>
+
+      <!-- Status Bar -->
+      <footer class="editor-statusbar">
+        <div class="status-left">
+          <span id="status-line-col" class="status-badge">Ln 1, Col 1</span>
+          <span id="status-lines-count" class="status-badge">0 lines</span>
+        </div>
+        <div class="status-right">
+          <span class="status-badge">UTF-8</span>
+          <span class="status-badge" style="color: #34d399;">Ready</span>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Resizable Gutter -->
+    <div id="pane-resizer" class="pane-resizer" title="Drag to resize panes"></div>
+
+    <!-- Right Pane: Review Dashboard & Analytics -->
+    <section id="review-pane" class="review-pane" aria-label="Code Review Dashboard">
+      
+      <!-- Review Tabs Header -->
+      <nav class="review-tabs" role="tablist">
+        <button class="tab-btn active" data-tab="overview" role="tab" aria-selected="true">
+          Overview
+        </button>
+        <button class="tab-btn" data-tab="issues" role="tab" aria-selected="false">
+          Problems &amp; Solutions <span id="issues-badge-count" class="tab-badge">0</span>
+        </button>
+        <button class="tab-btn" data-tab="tests" role="tab" aria-selected="false">
+          Unit Tests
+        </button>
+      </nav>
+
+      <!-- Overview Tab -->
+      <div id="tab-overview" class="tab-content active">
+        <div id="tab-overview-content">
+          <!-- Initial Clean Welcome Card -->
+          <div class="scorecard-hero">
+            <div class="score-main-block">
+              <div class="score-circle grade-a">
+                <span class="score-number">--</span>
+                <span class="score-label">READY</span>
+              </div>
+              <div class="score-details">
+                <h3>Ready to Review</h3>
+                <p>Paste code into the editor, upload a file, or open a folder. Click "Review Code" to identify vulnerabilities, bugs, and get instant solutions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Issues Tab -->
+      <div id="tab-issues" class="tab-content">
+        <div id="issues-filter-bar" class="filter-bar"></div>
+        <div id="issues-list-container">
+          <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+            <p>No issues analyzed yet.</p>
+            <p style="font-size: 12px; margin-top: 4px;">Click "Review Code" to analyze problems and view solutions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tests Tab -->
+      <div id="tab-tests" class="tab-content">
+        <div id="tab-tests-content"></div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="modal-settings" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Settings</h3>
+        <button id="btn-close-settings" class="btn btn-secondary btn-icon" aria-label="Close settings">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="input-api-key">Google Gemini API Key (Optional)</label>
+          <input type="password" id="input-api-key" class="form-input" placeholder="AIzaSy... (Leave empty for local engine)">
+          <small style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            Enter your Google Gemini API key to enable LLM semantic reasoning and solution generation. If left blank, the built-in static analysis engine is used.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="select-model">Model Selection</label>
+          <select id="select-model" class="custom-select" style="width: 100%;">
+            <option value="gemini-3.6-flash">Gemini 3.6 Flash (Fast &amp; Accurate - Recommended)</option>
+            <option value="gemini-flash-latest">Gemini Flash Latest</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Deep Reasoning)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-settings" class="btn btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="modal-export" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Report</h3>
+        <button id="btn-close-export" class="btn btn-secondary btn-icon" aria-label="Close export">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="select-export-format">Export Format</label>
+          <select id="select-export-format" class="custom-select" style="width: 100%;">
+            <option value="markdown">Markdown (.md) - For GitHub PR Comments</option>
+            <option value="json">JSON (.json) - For CI/CD &amp; Automation</option>
+            <option value="html">HTML (.html) - Standalone Printable Report</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-download-export" class="btn btn-primary">Download Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Monaco AMD Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <!-- Application Main Controller -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

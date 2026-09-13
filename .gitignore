@@ -1,0 +1,29 @@
+# Environment & Secrets (NEVER commit your actual API keys)
+.env
+*.env
+*.env.*
+!*.env.example
+
+# Python cache & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Local SQLite Database
+backend/reviews.db
+*.db
+*.sqlite3
+
+# IDEs & System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
