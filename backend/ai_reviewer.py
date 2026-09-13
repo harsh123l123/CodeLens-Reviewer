@@ -39,8 +39,10 @@ def get_effective_api_key(api_key: str = None) -> str:
 
 def call_gemini_api(code: str, language: str, api_key: str, model: str = None) -> dict:
     preferred_model = model or GEMINI_MODEL
+    if preferred_model in ("gemini-2.5-flash", "gemini-1.5-flash"):
+        preferred_model = "gemini-3.6-flash"
     models_to_try = [preferred_model]
-    for fallback in ["gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+    for fallback in ["gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash"]:
         if fallback not in models_to_try:
             models_to_try.append(fallback)
 

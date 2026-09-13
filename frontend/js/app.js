@@ -5,12 +5,18 @@ import { initMonaco, getEditorValue, setEditorValue, setEditorLanguage, jumpToLi
 import { renderDiffView } from "./diff_viewer.js";
 import { renderScorecard, renderIssues, renderFilterPills, renderUnitTests } from "./review_ui.js";
 
+let initialModel = localStorage.getItem("gemini_model") || "gemini-3.6-flash";
+if (initialModel === "gemini-2.5-flash") {
+  initialModel = "gemini-3.6-flash";
+  localStorage.setItem("gemini_model", "gemini-3.6-flash");
+}
+
 // Global Application State
 const state = {
   currentReview: null,
   language: "python",
   apiKey: localStorage.getItem("gemini_api_key") || "",
-  model: localStorage.getItem("gemini_model") || "gemini-3.6-flash",
+  model: initialModel,
   editorMode: "editor", // 'editor' | 'diff'
   activeTab: "overview",
   issuesFilter: "all",
